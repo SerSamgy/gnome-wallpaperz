@@ -1,4 +1,4 @@
 {% import "starttime.xml" as starttime %}
 <background>
-  {% starttime::start_time(start_datetime) %}
+  {{ starttime::start_time() }}
 </background>

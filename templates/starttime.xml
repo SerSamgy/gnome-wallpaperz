@@ -1,10 +1,11 @@
-{% macro start_time(datetime) %}
+{% macro start_time() %}
+{% set datetime = now() %}
   <starttime>
-    <year>datetime.year()</year>
-    <month>datetime.month()</month>
-    <day>datetime.day()</day>
-    <hour>datetime.hour()</hour>
-    <minute>datetime.minute()</minute>
-    <second>datetime.second()</second>
+    <year>{{ datetime | date(format="%Y") }}</year>
+    <month>{{ datetime | date(format="%m") }}</month>
+    <day>{{ datetime | date(format="%d") }}</day>
+    <hour>{{ datetime | date(format="%k") }}</hour>
+    <minute>{{ datetime | date(format="%M") }}</minute>
+    <second>{{ datetime | date(format="%S") }}</second>
   </starttime>
 {% endmacro start_time %}
