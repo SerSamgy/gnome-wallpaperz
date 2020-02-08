@@ -1,0 +1,10 @@
+{% macro start_time(datetime) %}
+  <starttime>
+    <year>datetime.year()</year>
+    <month>datetime.month()</month>
+    <day>datetime.day()</day>
+    <hour>datetime.hour()</hour>
+    <minute>datetime.minute()</minute>
+    <second>datetime.second()</second>
+  </starttime>
+{% endmacro start_time %}

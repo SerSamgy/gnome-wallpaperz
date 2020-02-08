@@ -1,0 +1,4 @@
+{% import "starttime.xml" as starttime %}
+<background>
+  {% starttime::start_time(start_datetime) %}
+</background>
