@@ -1,0 +1,6 @@
+{% macro static(duration, filename) %}
+  <static>
+    <duration>{{ duration }}</duration>
+    <file>{{ filename }}</file>
+  </static>
+{% endmacro static %}
