@@ -1,4 +1,6 @@
-{% import "starttime.xml" as starttime %}
+{% import "starttime.xml" as start_time %}
+{% import "static.xml" as static %}
 <background>
-  {{ starttime::start_time() }}
+  {{ start_time::start_time(datetime=starttime) }}
+  {{ static::static(duration=duration, filename=filename) }}
 </background>
