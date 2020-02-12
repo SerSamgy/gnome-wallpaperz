@@ -34,7 +34,8 @@ lazy_static! {
 
 pub fn render(context: IndexContext) -> Result<String, &'static str> {
     let serialized_context = &Context::from_serialize(&context).expect("failed to serialize template context");
-    let rendered = TEMPLATES.render("index.xml", serialized_context).expect("failed to render template");
+    let rendered = TEMPLATES.render("index.xml", serialized_context)
+                            .expect("failed to render template");
 
     Ok(rendered)
 }
@@ -66,10 +67,8 @@ mod tests {
                 hour=starttime.hour(), minute=starttime.minute(), second=starttime.second(),
                 duration=duration, filename=filename);
         let render_context = IndexContext::new(starttime, duration, filename).unwrap();
-
-        // let err = render(render_context).unwrap_err();
-        // println!("{}", err)
         let rendered = render(render_context).unwrap();
+
         assert_eq!(expected_tmpl, rendered)
     }
 }
