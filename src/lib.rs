@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate lazy_static;
 
+mod filters;
+
 use chrono::prelude::*;
 use serde::Serialize;
 use tera::{ Tera, Context };
@@ -28,6 +30,7 @@ lazy_static! {
             }
         };
         tera.autoescape_on(vec![]);
+        tera.register_filter("with_zero", filters::with_zero);
         tera
     };
 }
