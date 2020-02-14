@@ -2,5 +2,7 @@
 {% import "static.xml" as static %}
 <background>
   {{ start_time::start_time(datetime=starttime) }}
-  {{ static::static(duration=duration, filename=filename) }}
+  {% for filename in filenames -%}
+    {{ static::static(duration=duration, filename=filename) }}
+  {%- endfor %}
 </background>
