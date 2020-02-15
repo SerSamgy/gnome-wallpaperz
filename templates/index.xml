@@ -1,8 +1,15 @@
 {% import "starttime.xml" as start_time %}
 {% import "static.xml" as static %}
+{% import "transition.xml" as transition %}
 <background>
   {{ start_time::start_time(datetime=starttime) }}
   {% for filename in filenames -%}
     {{ static::static(duration=duration, filename=filename) }}
+    {%- if loop.first == loop.last -%} 
+      {%- break -%}
+    {%- else -%}
+    {%- set next_filename = filenames | nth(n=loop.index0 + 1) -%}
+    {{ transition::transition(duration=trans_duration, filename_from=filename, filename_to=next_filename) }}
+    {%- endif -%}
   {%- endfor %}
 </background>
