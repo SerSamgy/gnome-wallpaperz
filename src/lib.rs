@@ -11,12 +11,13 @@ use tera::{ Tera, Context };
 pub struct IndexContext {
     pub starttime: DateTime<Local>,
     pub duration: f64,
+    pub transition: f64,
     pub filenames: Vec<String>,
 }
 
 impl IndexContext {
-    pub fn new(starttime: DateTime<Local>, duration: f64, filenames: Vec<String>) -> Result<IndexContext, &'static str> {
-        Ok(IndexContext {starttime, duration, filenames})
+    pub fn new(starttime: DateTime<Local>, duration: f64, transition: f64, filenames: Vec<String>) -> Result<IndexContext, &'static str> {
+        Ok(IndexContext {starttime, duration, transition, filenames})
     }
 }
 
@@ -51,6 +52,7 @@ mod tests {
     fn render_returns_one_static_with_one_file() {
         let starttime: DateTime<Local> = Local.ymd(2020, 2, 12).and_hms(16, 2, 2);
         let duration = 300.0;
+        let transition = 60.0;
         let filenames = vec![String::from("./my_awesome_file.jpeg")];
         let expected_tmpl = format!("\
 <background>
@@ -69,7 +71,7 @@ mod tests {
 </background>", year=starttime.year(), month=starttime.month(), day=starttime.day(), 
                 hour=starttime.hour(), minute=starttime.minute(), second=starttime.second(),
                 duration=duration, filename=filenames.first().unwrap());
-        let render_context = IndexContext::new(starttime, duration, filenames).unwrap();
+        let render_context = IndexContext::new(starttime, duration, transition, filenames).unwrap();
         let rendered = render(render_context).unwrap();
 
         assert_eq!(expected_tmpl, rendered)
