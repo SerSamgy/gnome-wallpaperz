@@ -3,13 +3,17 @@
 {% import "transition.xml" as transition %}
 <background>
   {{ start_time::start_time(datetime=starttime) }}
-  {% for filename in filenames -%}
-    {{ static::static(duration=duration, filename=filename) }}
-    {%- if loop.first == loop.last -%} 
-      {%- break -%}
+{%- for filename in filenames -%}
+  {{ static::static(duration=duration, filename=filename) }}
+  {%- if loop.first == loop.last -%} 
+    {%- break -%}
+  {%- else -%}
+    {%- if loop.last -%} 
+      {%- set next_filename = filenames | first -%}
     {%- else -%}
-    {%- set next_filename = filenames | nth(n=loop.index0 + 1) -%}
-    {{ transition::transition(duration=trans_duration, filename_from=filename, filename_to=next_filename) }}
+      {%- set next_filename = filenames | nth(n=loop.index0 + 1) -%}
     {%- endif -%}
-  {%- endfor %}
+  {{ transition::transition(duration=trans_duration, filename_from=filename, filename_to=next_filename) }}
+  {%- endif -%}
+{%- endfor -%}
 </background>

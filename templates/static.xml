@@ -1,6 +1,6 @@
-{%- macro static(duration, filename) -%}
+{% macro static(duration, filename) %}
   <static>
     <duration>{{ duration | with_zero }}</duration>
     <file>{{ filename }}</file>
   </static>
-{%- endmacro static -%}
+{% endmacro static %}

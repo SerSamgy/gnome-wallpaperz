@@ -7,4 +7,4 @@
     <minute>{{ datetime | date(format="%M") }}</minute>
     <second>{{ datetime | date(format="%S") }}</second>
   </starttime>
-{%- endmacro start_time -%}
+{% endmacro start_time %}

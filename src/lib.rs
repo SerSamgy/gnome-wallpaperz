@@ -63,6 +63,7 @@ mod tests {
     <minute>{minute:02}</minute>
     <second>{second:02}</second>
   </starttime>
+
   <static>
     <duration>{duration:.1}</duration>
     <file>{filename}</file>
@@ -93,19 +94,23 @@ mod tests {
     <minute>{minute:02}</minute>
     <second>{second:02}</second>
   </starttime>
+
   <static>
     <duration>{duration:.1}</duration>
     <file>{filename_0}</file>
   </static>
+
   <transition type=\"overlay\">
     <duration>{trans_duration:.1}</duration>
     <from>{filename_0}</from>
     <to>{filename_1}</to>
   </transition>
+
   <static>
     <duration>{duration:.1}</duration>
     <file>{filename_1}</file>
   </static>
+
   <transition type=\"overlay\">
     <duration>{trans_duration:.1}</duration>
     <from>{filename_1}</from>

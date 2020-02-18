@@ -1,6 +1,6 @@
 {% macro transition(duration, filename_from, filename_to, type="overlay") %}
   <transition type="{{ type }}">
-    <duration>{{ duration }}</duration>
+    <duration>{{ duration | with_zero }}</duration>
     <from>{{ filename_from }}</from>
     <to>{{ filename_to }}</to>
   </transition>
