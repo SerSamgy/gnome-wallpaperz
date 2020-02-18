@@ -1,26 +1,8 @@
-#[macro_use]
-extern crate lazy_static;
-
-use tera::{ Tera, Context };
-
-lazy_static! {
-    pub static ref TEMPLATES: Tera = {
-        let mut tera = match Tera::new("templates/**/*.xml") {
-            Ok(t) => t,
-            Err(e) => {
-                eprintln!("Parsing error(s): {}", e);
-                ::std::process::exit(1);
-            }
-        };
-        tera.autoescape_on(vec![]);
-        tera
-    };
-}
-
-fn main() -> Result<(), Box<dyn ::std::error::Error>> {
-    let context = Context::new();
-    let result = TEMPLATES.render("index.xml", &context)?;
-    println!("{}", result);
-
+/// Gets path to folder with wallpapers and generates xml file
+/// # Example
+/// ```
+/// gw path_to_folder output_file
+/// ```
+fn main() -> Result<(), Box<dyn::std::error::Error>> {
     Ok(())
 }
