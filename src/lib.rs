@@ -5,7 +5,7 @@ mod filters;
 
 use chrono::prelude::*;
 use serde::Serialize;
-use tera::{ Tera, Context };
+use tera::{Context, Tera};
 
 #[derive(Serialize, Debug)]
 pub struct IndexContext {
@@ -16,8 +16,18 @@ pub struct IndexContext {
 }
 
 impl IndexContext {
-    pub fn new(starttime: DateTime<Local>, duration: f64, trans_duration: f64, filenames: Vec<String>) -> Result<IndexContext, &'static str> {
-        Ok(IndexContext {starttime, duration, trans_duration, filenames})
+    pub fn new(
+        starttime: DateTime<Local>,
+        duration: f64,
+        trans_duration: f64,
+        filenames: Vec<String>,
+    ) -> Result<IndexContext, &'static str> {
+        Ok(IndexContext {
+            starttime,
+            duration,
+            trans_duration,
+            filenames,
+        })
     }
 }
 
@@ -37,9 +47,11 @@ lazy_static! {
 }
 
 pub fn render(context: IndexContext) -> Result<String, &'static str> {
-    let serialized_context = &Context::from_serialize(&context).expect("failed to serialize template context");
-    let rendered = TEMPLATES.render("index.xml", serialized_context)
-                            .expect("failed to render template");
+    let serialized_context =
+        &Context::from_serialize(&context).expect("failed to serialize template context");
+    let rendered = TEMPLATES
+        .render("index.xml", serialized_context)
+        .expect("failed to render template");
 
     Ok(rendered)
 }
@@ -53,7 +65,8 @@ mod tests {
         let starttime: DateTime<Local> = Local.ymd(2020, 2, 12).and_hms(16, 2, 2);
         let duration = 300.0;
         let filenames = vec![String::from("./my_awesome_file.jpeg")];
-        let expected_tmpl = format!("\
+        let expected_tmpl = format!(
+            "\
 <background>
   <starttime>
     <year>{year}</year>
@@ -68,9 +81,16 @@ mod tests {
     <duration>{duration:.1}</duration>
     <file>{filename}</file>
   </static>
-</background>", year=starttime.year(), month=starttime.month(), day=starttime.day(), 
-                hour=starttime.hour(), minute=starttime.minute(), second=starttime.second(),
-                duration=duration, filename=filenames.first().unwrap());
+</background>",
+            year = starttime.year(),
+            month = starttime.month(),
+            day = starttime.day(),
+            hour = starttime.hour(),
+            minute = starttime.minute(),
+            second = starttime.second(),
+            duration = duration,
+            filename = filenames.first().unwrap()
+        );
         let render_context = IndexContext::new(starttime, duration, 60.0, filenames).unwrap();
         let rendered = render(render_context).unwrap();
 
@@ -82,9 +102,12 @@ mod tests {
         let starttime: DateTime<Local> = Local.ymd(2020, 2, 12).and_hms(16, 2, 2);
         let duration = 300.0;
         let trans_duration = 60.0;
-        let filenames = vec![String::from("./my_awesome_file_0.jpeg"), 
-                             String::from("./my_awesome_file_1.jpeg")];
-        let expected_tmpl = format!("\
+        let filenames = vec![
+            String::from("./my_awesome_file_0.jpeg"),
+            String::from("./my_awesome_file_1.jpeg"),
+        ];
+        let expected_tmpl = format!(
+            "\
 <background>
   <starttime>
     <year>{year}</year>
@@ -116,11 +139,20 @@ mod tests {
     <from>{filename_1}</from>
     <to>{filename_0}</to>
   </transition>
-</background>", year=starttime.year(), month=starttime.month(), day=starttime.day(), 
-                hour=starttime.hour(), minute=starttime.minute(), second=starttime.second(),
-                duration=duration, filename_0=filenames.first().unwrap(),
-                trans_duration=trans_duration, filename_1=filenames.last().unwrap());
-        let render_context = IndexContext::new(starttime, duration, trans_duration, filenames).unwrap();
+</background>",
+            year = starttime.year(),
+            month = starttime.month(),
+            day = starttime.day(),
+            hour = starttime.hour(),
+            minute = starttime.minute(),
+            second = starttime.second(),
+            duration = duration,
+            filename_0 = filenames.first().unwrap(),
+            trans_duration = trans_duration,
+            filename_1 = filenames.last().unwrap()
+        );
+        let render_context =
+            IndexContext::new(starttime, duration, trans_duration, filenames).unwrap();
         let rendered = render(render_context).unwrap();
 
         assert_eq!(expected_tmpl, rendered)
