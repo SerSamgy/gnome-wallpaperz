@@ -3,6 +3,8 @@ extern crate lazy_static;
 
 mod filters;
 
+use std::{fs, io};
+use std::error::Error;
 use chrono::prelude::*;
 use serde::Serialize;
 use tera::{Context, Tera};
@@ -94,6 +96,24 @@ pub fn render(context: IndexContext) -> Result<String, &'static str> {
         .expect("failed to render template");
 
     Ok(rendered)
+}
+
+pub fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
+  let mut entries = fs::read_dir(path_to_directory)?
+        .map(|res| res.map(|dir_entry| dir_entry.file_name().into_string().unwrap_or_else(|_| { 
+          String::from("bad_filename")
+        }))).filter(|entry| entry.as_ref().unwrap() != &String::from("bad_filename"))
+        .collect::<Result<Vec<_>, io::Error>>()?;
+  entries.sort();
+
+  Ok(entries)
+}
+
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+  let entries = get_filenames(config.source_path)?;
+  let context = IndexContext::new(config.starttime, config.duration, config.trans_duration, entries);
+//   let rendered = render(context);
+  Ok(())
 }
 
 #[cfg(test)]
