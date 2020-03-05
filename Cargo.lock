@@ -169,7 +169,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gnome-wallpaperz"
+name = "gnome_wallpaperz"
 version = "0.1.0"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",

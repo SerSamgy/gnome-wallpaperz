@@ -1,5 +1,5 @@
 [package]
-name = "gnome-wallpaperz"
+name = "gnome_wallpaperz"
 version = "0.1.0"
 authors = ["sersamgy <samgy7cool@gmail.com>"]
 edition = "2018"
