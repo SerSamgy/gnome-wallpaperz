@@ -3,56 +3,62 @@ extern crate lazy_static;
 
 mod filters;
 
-use std::{fs, io};
-use std::error::Error;
 use chrono::prelude::*;
 use serde::Serialize;
+use std::error::Error;
+use std::{fs, io};
 use tera::{Context, Tera};
 
 #[derive(Debug)]
 pub struct Config {
-  pub source_path: String,
-  pub output_filename: String,
-  pub starttime: DateTime<Local>,
-  pub duration: f64,
-  pub trans_duration: f64,
+    pub source_path: String,
+    pub output_filename: String,
+    pub starttime: DateTime<Local>,
+    pub duration: f64,
+    pub trans_duration: f64,
 }
 
 impl Config {
-  pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
-    let source_path = match args.next() {
-      Some(sp) => sp,
-      None => return Err("Didn't get path to source folder"),
-    };
+    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
+        let source_path = match args.next() {
+            Some(sp) => sp,
+            None => return Err("Didn't get path to source folder"),
+        };
 
-    let output_filename = match args.next() {
-      Some(out) => out,
-      None => return Err("Didn't get the name of output file"),
-    };
+        let output_filename = match args.next() {
+            Some(out) => out,
+            None => return Err("Didn't get the name of output file"),
+        };
 
-    // Optional parameters for now
-    let starttime = match args.next() {
-      Some(st) => match Local.datetime_from_str(&st, "%Y-%m-%d %H:%M:%S").ok() {
-        Some(dt) => dt,
-        None => return Err("Failed to parse provided start time"),
-      },
-      None => Local::now(), 
-    };
+        // Optional parameters for now
+        let starttime = match args.next() {
+            Some(st) => match Local.datetime_from_str(&st, "%Y-%m-%d %H:%M:%S").ok() {
+                Some(dt) => dt,
+                None => return Err("Failed to parse provided start time"),
+            },
+            None => Local::now(),
+        };
 
-    let default_duration = 300.0;
-    let duration = match args.next() {
-      Some(dr) => dr.parse::<f64>().unwrap_or(default_duration),
-      None => default_duration, 
-    };
-    
-    let default_trans_duration = 60.0;
-    let trans_duration = match args.next() {
-      Some(td) => td.parse::<f64>().unwrap_or(default_trans_duration),
-      None => default_trans_duration, 
-    };
+        let default_duration = 300.0;
+        let duration = match args.next() {
+            Some(dr) => dr.parse::<f64>().unwrap_or(default_duration),
+            None => default_duration,
+        };
 
-    Ok(Config{ source_path, output_filename, starttime, duration, trans_duration })
-  }
+        let default_trans_duration = 60.0;
+        let trans_duration = match args.next() {
+            Some(td) => td.parse::<f64>().unwrap_or(default_trans_duration),
+            None => default_trans_duration,
+        };
+
+        Ok(Config {
+            source_path,
+            output_filename,
+            starttime,
+            duration,
+            trans_duration,
+        })
+    }
 }
 
 #[derive(Serialize, Debug)]
@@ -99,21 +105,32 @@ pub fn render(context: IndexContext) -> Result<String, &'static str> {
 }
 
 pub fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
-  let mut entries = fs::read_dir(path_to_directory)?
-        .map(|res| res.map(|dir_entry| dir_entry.file_name().into_string().unwrap_or_else(|_| { 
-          String::from("bad_filename")
-        }))).filter(|entry| entry.as_ref().unwrap() != &String::from("bad_filename"))
+    let mut entries = fs::read_dir(path_to_directory)?
+        .map(|res| {
+            res.map(|dir_entry| {
+                dir_entry
+                    .file_name()
+                    .into_string()
+                    .unwrap_or_else(|_| String::from("bad_filename"))
+            })
+        })
+        .filter(|entry| entry.as_ref().unwrap() != &String::from("bad_filename"))
         .collect::<Result<Vec<_>, io::Error>>()?;
-  entries.sort();
+    entries.sort();
 
-  Ok(entries)
+    Ok(entries)
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-  let entries = get_filenames(config.source_path)?;
-  let context = IndexContext::new(config.starttime, config.duration, config.trans_duration, entries);
-//   let rendered = render(context);
-  Ok(())
+    let entries = get_filenames(config.source_path)?;
+    let context = IndexContext::new(
+        config.starttime,
+        config.duration,
+        config.trans_duration,
+        entries,
+    );
+    //   let rendered = render(context);
+    Ok(())
 }
 
 #[cfg(test)]
