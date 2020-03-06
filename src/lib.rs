@@ -6,6 +6,8 @@ mod filters;
 use chrono::prelude::*;
 use serde::Serialize;
 use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
 use std::{fs, io};
 use tera::{Context, Tera};
 
@@ -20,6 +22,8 @@ pub struct Config {
 
 impl Config {
     pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
+        args.next();
+
         let source_path = match args.next() {
             Some(sp) => sp,
             None => return Err("Didn't get path to source folder"),
@@ -94,17 +98,18 @@ lazy_static! {
     };
 }
 
-pub fn render(context: IndexContext) -> Result<String, &'static str> {
-    let serialized_context =
-        &Context::from_serialize(&context).expect("failed to serialize template context");
-    let rendered = TEMPLATES
-        .render("index.xml", serialized_context)
-        .expect("failed to render template");
+pub fn render(context: IndexContext) -> Result<String, Box<dyn Error>> {
+    let serialized_context = &Context::from_serialize(&context)?;
+    let rendered = TEMPLATES.render("index.xml", serialized_context)?;
 
     Ok(rendered)
 }
 
 pub fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
+    // TODO: check if folder contains 2 or more files
+    // TODO: filter directories
+    // TODO: filter files by picture types
+    // TODO: get filenames with full paths
     let mut entries = fs::read_dir(path_to_directory)?
         .map(|res| {
             res.map(|dir_entry| {
@@ -123,13 +128,18 @@ pub fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let entries = get_filenames(config.source_path)?;
+
     let context = IndexContext::new(
         config.starttime,
         config.duration,
         config.trans_duration,
         entries,
-    );
-    //   let rendered = render(context);
+    )?;
+    let rendered = render(context)?;
+
+    let mut buffer = File::create(config.output_filename)?;
+    write!(&mut buffer, "{}", rendered)?;
+
     Ok(())
 }
 
@@ -138,44 +148,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn render_returns_one_static_with_one_file() {
-        let starttime: DateTime<Local> = Local.ymd(2020, 2, 12).and_hms(16, 2, 2);
-        let duration = 300.0;
-        let filenames = vec![String::from("./my_awesome_file.jpeg")];
-        let expected_tmpl = format!(
-            "\
-<background>
-  <starttime>
-    <year>{year}</year>
-    <month>{month:02}</month>
-    <day>{day}</day>
-    <hour>{hour}</hour>
-    <minute>{minute:02}</minute>
-    <second>{second:02}</second>
-  </starttime>
-
-  <static>
-    <duration>{duration:.1}</duration>
-    <file>{filename}</file>
-  </static>
-</background>",
-            year = starttime.year(),
-            month = starttime.month(),
-            day = starttime.day(),
-            hour = starttime.hour(),
-            minute = starttime.minute(),
-            second = starttime.second(),
-            duration = duration,
-            filename = filenames.first().unwrap()
-        );
-        let render_context = IndexContext::new(starttime, duration, 60.0, filenames).unwrap();
-        let rendered = render(render_context).unwrap();
-
-        assert_eq!(expected_tmpl, rendered)
-    }
-
-    #[test]
-    fn render_returns_static_and_transition_with_two_files() {
+    fn render_returns_static_and_transition() {
         let starttime: DateTime<Local> = Local.ymd(2020, 2, 12).and_hms(16, 2, 2);
         let duration = 300.0;
         let trans_duration = 60.0;

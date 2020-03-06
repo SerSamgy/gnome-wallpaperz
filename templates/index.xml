@@ -5,15 +5,11 @@
   {{ start_time::start_time(datetime=starttime) }}
 {%- for filename in filenames -%}
   {{ static::static(duration=duration, filename=filename) }}
-  {%- if loop.first == loop.last -%} 
-    {%- break -%}
+  {%- if loop.last -%} 
+    {%- set next_filename = filenames | first -%}
   {%- else -%}
-    {%- if loop.last -%} 
-      {%- set next_filename = filenames | first -%}
-    {%- else -%}
-      {%- set next_filename = filenames | nth(n=loop.index0 + 1) -%}
-    {%- endif -%}
-  {{ transition::transition(duration=trans_duration, filename_from=filename, filename_to=next_filename) }}
+    {%- set next_filename = filenames | nth(n=loop.index0 + 1) -%}
   {%- endif -%}
+  {{ transition::transition(duration=trans_duration, filename_from=filename, filename_to=next_filename) }}
 {%- endfor -%}
 </background>
