@@ -109,14 +109,11 @@ pub fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
     // TODO: check if folder contains 2 or more files
     // TODO: filter directories
     // TODO: filter files by picture types
-    // TODO: get filenames with full paths
     let mut entries = fs::read_dir(path_to_directory)?
         .map(|res| {
-            res.map(|dir_entry| {
-                dir_entry
-                    .file_name()
-                    .into_string()
-                    .unwrap_or_else(|_| String::from("bad_filename"))
+            res.map(|dir_entry| match dir_entry.path().to_str() {
+                Some(file_path) => file_path.to_string(),
+                None => String::from("bad_filename"),
             })
         })
         .filter(|entry| entry.as_ref().unwrap() != &String::from("bad_filename"))
