@@ -101,7 +101,7 @@ lazy_static! {
     };
 }
 
-pub fn render(context: IndexContext) -> Result<String, Box<dyn Error>> {
+fn render(context: IndexContext) -> Result<String, Box<dyn Error>> {
     let serialized_context = &Context::from_serialize(&context)?;
     let rendered = TEMPLATES.render("index.xml", serialized_context)?;
 
@@ -111,10 +111,19 @@ pub fn render(context: IndexContext) -> Result<String, Box<dyn Error>> {
 fn get_file_path(dir_entry: DirEntry) -> Option<PathBuf> {
     let file_path = dir_entry.path();
     if file_path.is_file() {
-        let file_extension = &file_path.extension().unwrap();
-        if ALLOWED_FILETYPES.contains(&file_extension.to_str().unwrap()) {
-            return Some(file_path);
-        }
+        match &file_path.extension() {
+            Some(file_ext) => {
+                match file_ext.to_str() {
+                    Some(fe) => {
+                        if ALLOWED_FILETYPES.contains(&fe) {
+                            return Some(file_path);
+                        }
+                    }
+                    None => return None,
+                };
+            }
+            None => return None,
+        };
     }
 
     return None;
