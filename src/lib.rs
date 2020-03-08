@@ -6,8 +6,9 @@ mod filters;
 use chrono::prelude::*;
 use serde::Serialize;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{DirEntry, File};
 use std::io::prelude::*;
+use std::path::PathBuf;
 use std::{fs, io};
 use tera::{Context, Tera};
 
@@ -105,14 +106,25 @@ pub fn render(context: IndexContext) -> Result<String, Box<dyn Error>> {
     Ok(rendered)
 }
 
-pub fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
+fn get_file_path(dir_entry: DirEntry) -> Option<PathBuf> {
+    let file_path = dir_entry.path();
+    if file_path.is_file() {
+        return Some(file_path);
+    }
+
+    return None;
+}
+
+fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
     // TODO: check if folder contains 2 or more files
-    // TODO: filter directories
     // TODO: filter files by picture types
     let mut entries = fs::read_dir(path_to_directory)?
         .map(|res| {
-            res.map(|dir_entry| match dir_entry.path().to_str() {
-                Some(file_path) => file_path.to_string(),
+            res.map(|dir_entry| match get_file_path(dir_entry) {
+                Some(file_path) => match file_path.to_str() {
+                    Some(file_path) => file_path.to_string(),
+                    None => String::from("bad_filename"),
+                },
                 None => String::from("bad_filename"),
             })
         })
