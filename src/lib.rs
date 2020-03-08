@@ -12,6 +12,8 @@ use std::path::PathBuf;
 use std::{fs, io};
 use tera::{Context, Tera};
 
+const ALLOWED_FILETYPES: [&str; 3] = ["jpeg", "jpg", "png"];
+
 #[derive(Debug)]
 pub struct Config {
     pub source_path: String,
@@ -109,7 +111,10 @@ pub fn render(context: IndexContext) -> Result<String, Box<dyn Error>> {
 fn get_file_path(dir_entry: DirEntry) -> Option<PathBuf> {
     let file_path = dir_entry.path();
     if file_path.is_file() {
-        return Some(file_path);
+        let file_extension = &file_path.extension().unwrap();
+        if ALLOWED_FILETYPES.contains(&file_extension.to_str().unwrap()) {
+            return Some(file_path);
+        }
     }
 
     return None;
@@ -117,7 +122,6 @@ fn get_file_path(dir_entry: DirEntry) -> Option<PathBuf> {
 
 fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
     // TODO: check if folder contains 2 or more files
-    // TODO: filter files by picture types
     let mut entries = fs::read_dir(path_to_directory)?
         .map(|res| {
             res.map(|dir_entry| match get_file_path(dir_entry) {
