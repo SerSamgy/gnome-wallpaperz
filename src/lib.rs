@@ -8,6 +8,8 @@ use serde::Serialize;
 use std::error::Error;
 use std::fs::{DirEntry, File};
 use std::io::prelude::*;
+use std::io::Error as IOError;
+use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::{fs, io};
 use tera::{Context, Tera};
@@ -129,8 +131,17 @@ fn get_file_path(dir_entry: DirEntry) -> Option<PathBuf> {
     return None;
 }
 
+// TODO: add test!
+fn check_applicable_amount_of_entries(entries: Vec<String>) -> io::Result<Vec<String>> {
+    if entries.len() < 2 {
+        let err = IOError::new(ErrorKind::Other, "there must be 2 or more files to be used");
+        return Err(err);
+    }
+
+    Ok(entries)
+}
+
 fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
-    // TODO: check if folder contains 2 or more files
     let mut entries = fs::read_dir(path_to_directory)?
         .map(|res| {
             res.map(|dir_entry| match get_file_path(dir_entry) {
@@ -143,6 +154,8 @@ fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
         })
         .filter(|entry| entry.as_ref().unwrap() != &String::from("bad_filename"))
         .collect::<Result<Vec<_>, io::Error>>()?;
+
+    entries = check_applicable_amount_of_entries(entries)?;
     entries.sort();
 
     Ok(entries)
