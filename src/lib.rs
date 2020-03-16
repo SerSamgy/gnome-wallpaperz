@@ -1,15 +1,16 @@
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate anyhow;
 
 mod filters;
 
+use anyhow::Result;
 use chrono::prelude::*;
 use serde::Serialize;
 use std::error::Error;
 use std::fs::{DirEntry, File};
 use std::io::prelude::*;
-use std::io::Error as IOError;
-use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::{fs, io};
 use tera::{Context, Tera};
@@ -131,17 +132,15 @@ fn get_file_path(dir_entry: DirEntry) -> Option<PathBuf> {
     return None;
 }
 
-// TODO: add test!
-fn check_applicable_amount_of_entries(entries: Vec<String>) -> io::Result<Vec<String>> {
+fn check_applicable_amount_of_entries(entries: Vec<String>) -> Result<Vec<String>> {
     if entries.len() < 2 {
-        let err = IOError::new(ErrorKind::Other, "there must be 2 or more files to be used");
-        return Err(err);
+        return Err(anyhow!("there must be 2 or more files to be used"));
     }
 
     Ok(entries)
 }
 
-fn get_filenames(path_to_directory: String) -> io::Result<Vec<String>> {
+fn get_filenames(path_to_directory: String) -> Result<Vec<String>> {
     let mut entries = fs::read_dir(path_to_directory)?
         .map(|res| {
             res.map(|dir_entry| match get_file_path(dir_entry) {
@@ -241,5 +240,24 @@ mod tests {
         let rendered = render(render_context).unwrap();
 
         assert_eq!(expected_tmpl, rendered)
+    }
+
+    #[test]
+    fn test_check_applicable_amount_of_entries() {
+        let tests: Vec<Vec<String>> = vec![vec![], vec![String::from("./my_awesome_file_0.jpeg")]];
+        for input in tests {
+            let result = check_applicable_amount_of_entries(input);
+            assert!(result.is_err());
+            result.expect_err("there must be 2 or more files to be used");
+        }
+
+        let input = vec![
+            String::from("./my_awesome_file_0.jpeg"),
+            String::from("./my_awesome_file_1.jpeg"),
+        ];
+        let expected = input.clone();
+        let input = check_applicable_amount_of_entries(input);
+        assert!(input.is_ok());
+        assert_eq!(input.unwrap(), expected);
     }
 }
